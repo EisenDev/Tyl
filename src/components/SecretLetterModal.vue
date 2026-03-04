@@ -51,6 +51,12 @@
             I promise.
           </p>
           <p class="modal-signature">— with everything I have, always.</p>
+          
+          <div class="clue-section">
+            <p class="modal-line clue-text">
+              Not everything is seen inside sometimes you need to look outside the space <span class="highlight">my beloved</span>.
+            </p>
+          </div>
         </div>
 
         <!-- Wax seal -->
@@ -202,6 +208,23 @@ onUnmounted(() => document.removeEventListener('keydown', onKeydown))
   margin-top: 1.6rem;
   position: relative;
   z-index: 2;
+}
+
+.clue-section {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px dashed rgba(134,167,137,0.3);
+}
+
+.clue-text {
+  font-size: 1.1rem;
+  font-style: italic;
+  color: var(--ink-muted);
+}
+
+.highlight {
+  color: var(--sage-dark);
+  font-weight: 500;
 }
 
 /* ── Transitions ──────────────────────────────── */

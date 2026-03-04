@@ -1,8 +1,15 @@
 <template>
-  <section id="narrative" class="section narrative-section">
+  <section
+    id="narrative"
+    class="section narrative-section"
+  >
 
     <!-- ── Scattered background tulips — many colors ────── -->
-    <div class="bg-tulip bg-tulip--1" aria-hidden="true">
+    <!-- Upper-right background tulip -->
+    <div
+      class="bg-tulip bg-tulip--1"
+      aria-hidden="true"
+    >
       <TulipSvg :size="110" :opacity="0.07" color="#86A789" />
     </div>
     <div class="bg-tulip bg-tulip--2" aria-hidden="true">
@@ -50,11 +57,19 @@
         :data-index="i"
         :ref="(el) => registerRef(el as Element | null, i)"
       >
-        <!-- Regular lines -->
-        <template v-if="!line.closing">{{ line.text }}</template>
+        <!-- Regular lines — split line[3] to inject clickable EE trigger -->
+        <template v-if="!line.closing && i !== 3">{{ line.text }}</template>
+
+        <!-- Line 3: "I am still learning." is a hidden Easter egg trigger -->
+        <template v-else-if="!line.closing && i === 3">
+          <span
+            class="ee-trigger"
+            @click="apologyEggRef?.open()"
+          >I am still learning.</span>{{ line.text.slice('I am still learning.'.length) }}
+        </template>
 
         <!-- Closing line: signature + inline envelope button -->
-        <template v-else>
+        <template v-else-if="line.closing">
           <span>{{ line.text }}</span>
           <button
             class="inline-note-btn"
@@ -76,6 +91,9 @@
 
     <!-- ── Secret note modal (v-model) ──────────── -->
     <SecretLetterModal v-model:open="noteOpen" />
+
+    <!-- ── EE#4: Apology egg ──────────────────── -->
+    <ApologyEgg ref="apologyEggRef" />
   </section>
 </template>
 
@@ -83,6 +101,7 @@
 import { ref, reactive, onMounted, onUnmounted } from 'vue'
 import TulipSvg from './TulipSvg.vue'
 import SecretLetterModal from './SecretLetterModal.vue'
+import ApologyEgg from './ApologyEgg.vue'
 
 interface Line {
   text: string
@@ -133,9 +152,10 @@ const lines: Line[] = [
   },
 ]
 
-const noteOpen = ref(false)
-const revealed = reactive<boolean[]>(new Array(lines.length).fill(false))
-const elRefs = ref<(Element | null)[]>([])
+const noteOpen     = ref(false)
+const apologyEggRef= ref<InstanceType<typeof ApologyEgg> | null>(null)
+const revealed     = reactive<boolean[]>(new Array(lines.length).fill(false))
+const elRefs       = ref<(Element | null)[]>([])
 let observer: IntersectionObserver | null = null
 
 function registerRef(el: Element | null, index: number) {
@@ -246,4 +266,23 @@ onUnmounted(() => observer?.disconnect())
 .bg-tulip--6 { bottom: 10%; left: 2rem;   transform: rotate(-22deg) scaleX(-1); }
 .bg-tulip--7 { bottom: 35%; left: -1rem;  transform: rotate(14deg); }
 .bg-tulip--8 { top: 60%;    right: 0rem;  transform: rotate(-6deg) scaleX(-1); }
+
+/* Interactive tulip (EE#5) */
+.tulip-interactive {
+  pointer-events: all !important;
+  cursor: pointer;
+}
+
+/* Hidden EE trigger — same color, no hover */
+.ee-trigger {
+  cursor: pointer;
+  color: inherit;
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  display: inline;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
 </style>

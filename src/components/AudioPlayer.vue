@@ -8,8 +8,8 @@
     aria-hidden="true"
   />
 
-  <!-- Music Note Modal -->
-  <MusicNoteModal v-model:open="noteOpen" />
+  <!-- China Box Easter Egg (Hidden Mystery) -->
+  <ChinaBoxEgg ref="chinaBoxRef" />
 
   <div class="audio-player" role="region" aria-label="Background music">
 
@@ -89,7 +89,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import MusicNoteModal from './MusicNoteModal.vue'
+import ChinaBoxEgg from './ChinaBoxEgg.vue'
 
 /* ── Track definitions ─────────────────────────────────────────── */
 interface Track {
@@ -122,9 +122,9 @@ const props = defineProps<{ pendingAutoPlay?: boolean }>()
 
 const isPlaying     = ref(false)
 const showPicker    = ref(false)
-const noteOpen      = ref(false)
 const activeTrackId = ref<string>('piano')
 const pendingStart  = ref(false)
+const chinaBoxRef   = ref<InstanceType<typeof ChinaBoxEgg> | null>(null)
 
 const currentTrack = computed(() => tracks.find(t => t.id === activeTrackId.value))
 
@@ -132,10 +132,10 @@ const currentTrack = computed(() => tracks.find(t => t.id === activeTrackId.valu
 const players: Record<string, any> = {}
 let fadeTimer: ReturnType<typeof setInterval> | null = null
 
-/* ── Music note modal ──────────────────────────────────────────── */
+/* ── Hidden Mystery → opens China Box Easter egg ─────────────────── */
 function openNote() {
   showPicker.value = false
-  noteOpen.value   = true
+  chinaBoxRef.value?.open()
 }
 
 /* ── YouTube IFrame API ────────────────────────────────────────── */

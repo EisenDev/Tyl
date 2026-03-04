@@ -72,6 +72,12 @@
                 my greatest adventure, my safest place, and my truest home.
               </p>
               <p class="lp-closing">Forever and always yours,</p>
+
+              <!-- Hint for Easter Egg #2 -->
+              <p class="lp-hint">
+                ✨ ps. flowers hold more secrets than they let on.
+                the one you water every day… hold it a little longer.
+              </p>
             </div>
           </div>
         </Transition>
@@ -139,7 +145,7 @@
                 v-model="eggPhrase"
                 class="env-input"
                 type="text"
-                placeholder="trust yearning love…"
+                placeholder="enter passphrase"
                 :class="{ shake: shaking, correct: phraseCorrect }"
                 autocomplete="off"
                 spellcheck="false"
@@ -342,6 +348,19 @@ onUnmounted(() => document.removeEventListener('keydown', onKey))
   letter-spacing: 0.04em;
   opacity: 0;
   animation: paraFade 0.6s ease 1.4s forwards;
+}
+
+/* Easter egg hint — barely visible, whisper-level */
+.lp-hint {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.72rem;
+  font-style: italic;
+  color: var(--sage-light);
+  opacity: 0;
+  margin: 1.4rem 0 0;
+  letter-spacing: 0.06em;
+  line-height: 1.7;
+  animation: paraFade 0.7s ease 2s forwards;
 }
 
 @keyframes paraFade { to { opacity: 1; transform: translateY(0); } }

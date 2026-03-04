@@ -1,6 +1,6 @@
 <template>
-  <nav class="site-nav" role="navigation" aria-label="Main">
-    <a href="#" class="nav-brand">To My Beloved</a>
+  <nav class="site-nav" role="navigation" aria-label="Main" @click.self="menuOpen = false">
+    <a href="#" class="nav-brand" @click.prevent="onBrandClick">To My Beloved</a>
 
     <!-- Centre: Philippine date — clickable -->
     <button
@@ -47,15 +47,40 @@
 
   <!-- Daily modal (rendered outside nav for z-index) -->
   <DailyModal v-model:open="dailyOpen" />
+
+  <!-- Final Proposal Egg (Triggered by 3 fast clicks on brand) -->
+  <FinalProposalEgg ref="fpEggRef" />
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import DailyModal from './DailyModal.vue'
+import FinalProposalEgg from './FinalProposalEgg.vue'
 
 const menuOpen  = ref(false)
 const dailyOpen = ref(false)
 const phDate    = ref('')
+
+const fpEggRef = ref<InstanceType<typeof FinalProposalEgg> | null>(null)
+
+// 3 Fast Clicks Logic for EE#6 (Final Proposal)
+let clickCount = 0
+let clickTimer: ReturnType<typeof setTimeout> | null = null
+
+function onBrandClick() {
+  clickCount++
+  if (clickTimer) clearTimeout(clickTimer)
+  
+  if (clickCount >= 3) {
+    clickCount = 0
+    fpEggRef.value?.open()
+  } else {
+    // Reset click count after 600ms of inactivity
+    clickTimer = setTimeout(() => {
+      clickCount = 0
+    }, 600)
+  }
+}
 
 function computePhDate() {
   const ph = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila' }))

@@ -1,15 +1,28 @@
 <template>
-  <!-- Tulip confetti trigger — now fixed BOTTOM-LEFT -->
+  <!-- Tulip confetti trigger — fixed BOTTOM-LEFT -->
   <div class="tulip-trigger-anchor">
     <span class="tulip-hint">for you&nbsp;🌷</span>
-    <button
-      id="tulip-confetti-btn"
-      class="tulip-trigger-btn"
-      :class="{ blooming }"
-      aria-label="Send tulips"
-      title="A bouquet for you"
-      @click="bloom"
-    >
+    <div class="hold-ring-wrap">
+      <!-- Hold progress ring -->
+      <svg class="hold-ring" viewBox="0 0 48 48" :style="holdRingStyle">
+        <circle class="ring-track" cx="24" cy="24" r="21"/>
+        <circle class="ring-fill" cx="24" cy="24" r="21"
+          :style="{ strokeDashoffset: ringDashOffset }" />
+      </svg>
+      <button
+        id="tulip-confetti-btn"
+        class="tulip-trigger-btn"
+        :class="{ blooming, holding }"
+        aria-label="Send tulips"
+        title="A bouquet for you"
+        @click="bloom"
+        @mousedown="startHold"
+        @mouseup="cancelHold"
+        @mouseleave="cancelHold"
+        @touchstart.prevent="startHold"
+        @touchend="cancelHold"
+        @touchcancel="cancelHold"
+      >
       <svg viewBox="0 0 64 80" fill="none" xmlns="http://www.w3.org/2000/svg" width="22" height="28">
         <path d="M32 78 C32 62 32 50 32 36" stroke="#86A789" stroke-width="2.5" stroke-linecap="round"/>
         <path d="M32 54 C23 47 17 38 21 29 C26 38 30 46 32 54Z" fill="#86A789" opacity="0.6"/>
@@ -19,8 +32,12 @@
         <path d="M34 35 C38 27 44 20 46 11 C43 8 38 11 35 18Z" fill="#a8c4aa"/>
         <circle cx="32" cy="20" r="2.5" fill="#FAF9F6" opacity="0.85"/>
       </svg>
-    </button>
+      </button>
+    </div><!-- /hold-ring-wrap -->
   </div>
+
+  <!-- Scroll Easter Egg -->
+  <ScrollEgg ref="scrollEggRef" />
 
   <!-- Bouquet overlay — WITH backdrop blur -->
   <Transition name="bouquet-fade">
@@ -61,11 +78,47 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import confetti from 'canvas-confetti'
+import ScrollEgg from './ScrollEgg.vue'
 
-const blooming = ref(false)
+const blooming    = ref(false)
 const showBouquet = ref(false)
+const holding     = ref(false)
+const holdProgress= ref(0)
+const scrollEggRef= ref<InstanceType<typeof ScrollEgg> | null>(null)
+
+let holdTimer: ReturnType<typeof setInterval> | null = null
+let holdStart = 0
+
+const HOLD_MS = 5000
+
+/* ── Ring geometry ────────────────────────────────────────── */
+const RING_C = 2 * Math.PI * 21  // circumference for r=21
+const ringDashOffset = computed(() => RING_C * (1 - holdProgress.value))
+const holdRingStyle  = computed(() => ({ opacity: holding.value ? 1 : 0 }))
+
+/* ── Hold start/cancel ────────────────────────────────────── */
+function startHold() {
+  holding.value  = true
+  holdProgress.value = 0
+  holdStart = Date.now()
+
+  holdTimer = setInterval(() => {
+    const elapsed = Date.now() - holdStart
+    holdProgress.value = Math.min(elapsed / HOLD_MS, 1)
+    if (holdProgress.value >= 1) {
+      cancelHold()
+      scrollEggRef.value?.open()
+    }
+  }, 30)
+}
+
+function cancelHold() {
+  if (holdTimer) { clearInterval(holdTimer); holdTimer = null }
+  holding.value = false
+  holdProgress.value = 0
+}
 
 async function bloom() {
   if (blooming.value) return
@@ -131,7 +184,7 @@ async function bloom() {
 </script>
 
 <style scoped>
-/* ── MOVED TO BOTTOM-LEFT ─────────────────────── */
+/* ── ANCHORED BOTTOM-LEFT ─────────────────────── */
 .tulip-trigger-anchor {
   position: fixed;
   bottom: 2rem;
@@ -141,6 +194,41 @@ async function bloom() {
   flex-direction: column;
   align-items: center;
   gap: 0.4rem;
+}
+
+/* Wrap that houses button + ring overlay */
+.hold-ring-wrap {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* SVG ring overlay */
+.hold-ring {
+  position: absolute;
+  inset: -2px;
+  width: calc(100% + 4px);
+  height: calc(100% + 4px);
+  transform: rotate(-90deg);
+  transition: opacity 0.2s;
+  pointer-events: none;
+  z-index: 2;
+}
+.ring-track {
+  fill: none;
+  stroke: rgba(134, 167, 137, 0.18);
+  stroke-width: 2.5;
+}
+.ring-fill {
+  fill: none;
+  stroke: #86A789;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-dasharray: v-bind(RING_C);
+  transition: stroke-dashoffset 0.04s linear;
 }
 
 .tulip-trigger-btn {
