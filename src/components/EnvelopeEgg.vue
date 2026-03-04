@@ -82,7 +82,7 @@
                 <div class="fold fold-bottom"/>
               </div>
               <!-- Wax seal visible when envelope is closed -->
-              <div class="env-seal" :class="{ hide: phase !== 'envelope' }" aria-hidden="true">
+              <div class="env-seal" :class="{ hide: phase === 'revealed' }" aria-hidden="true">
                 <svg viewBox="0 0 44 44" width="44" height="44">
                   <circle cx="22" cy="22" r="20" fill="#86A789" opacity="0.13"/>
                   <circle cx="22" cy="22" r="13" fill="#86A789" opacity="0.2"/>
@@ -93,27 +93,11 @@
             </div>
 
             <!-- Flap — 3D rotates backward to open -->
-            <div class="env-flap" :class="{ open: phase !== 'envelope' }"/>
+            <div class="env-flap" :class="{ open: phase === 'opening' || phase === 'revealed' }"/>
 
           </div><!-- /env-wrap -->
 
-          <!-- Passphrase input — only in 'envelope' phase -->
-          <Transition name="input-fade">
-            <div v-if="phase === 'envelope'" class="env-input-zone">
-              <input
-                ref="inputRef"
-                v-model="eggPhrase"
-                class="env-input"
-                type="text"
-                placeholder="enter the key…"
-                :class="{ shake: shaking, correct: phraseCorrect }"
-                autocomplete="off"
-                spellcheck="false"
-                @input="onEggInput"
-              />
-              <p class="env-hint" :class="{ visible: shaking }">not quite…</p>
-            </div>
-          </Transition>
+          <!-- Passphrase input — REMOVED: egg opens immediately on click -->
 
         </div><!-- /env-panel -->
       </div><!-- /egg-scene -->
@@ -122,46 +106,24 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, nextTick, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 
-const phase        = ref<'idle'|'envelope'|'opening'|'revealed'>('idle')
-const eggPhrase    = ref('')
-const shaking      = ref(false)
-const phraseCorrect= ref(false)
-const inputRef     = ref<HTMLInputElement | null>(null)
-
-const SECRET = 'trust yearning love'
+const phase = ref<'idle' | 'opening' | 'revealed'>('idle')
 
 /* ── Open / close ─────────────────────────────────────────── */
 function open() {
-  phase.value     = 'envelope'
-  eggPhrase.value = ''
-  phraseCorrect.value = false
-  nextTick(() => inputRef.value?.focus())
+  // Go directly to opening animation — no passphrase needed
+  startOpenAnimation()
 }
 function close() {
   phase.value = 'idle'
-  eggPhrase.value = ''
 }
 defineExpose({ open })
 
-/* ── Passphrase check ─────────────────────────────────────── */
-function onEggInput() {
-  if (eggPhrase.value.toLowerCase().trim() === SECRET) {
-    phraseCorrect.value = true
-    startOpenAnimation()
-  }
-}
-
 /* ── Animation sequence ───────────────────────────────────── */
 function startOpenAnimation() {
-  // Phase 2: flap opens
   phase.value = 'opening'
-
-  // Phase 3: after 2s → reveal side-by-side layout
-  setTimeout(() => {
-    phase.value = 'revealed'
-  }, 2000)
+  setTimeout(() => { phase.value = 'revealed' }, 2000)
 }
 
 /* ── Computed classes ─────────────────────────────────────── */
@@ -192,7 +154,7 @@ onUnmounted(() => document.removeEventListener('keydown', onKey))
   background: rgba(245, 243, 238, 0.93);
   backdrop-filter: blur(22px);
   -webkit-backdrop-filter: blur(22px);
-  z-index: 3000;
+  z-index: 10001;  /* above security gate (9999) */
   display: flex;
   align-items: center;
   justify-content: center;
