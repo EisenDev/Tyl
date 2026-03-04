@@ -37,14 +37,14 @@
             You're the music I didn't know I was missing.
           </p>
           <p class="mn-para accent">
-            Before you, sound was just sound. But now — every song feels like
+            Before you, sound was just sound. But now every song feels like
             it's about us somehow. Every quiet melody feels like the space
             between your words. Every chorus feels like the moment I realized
             I was in too deep to ever want to find my way back.
           </p>
           <p class="mn-para">
             You are the kind of music that doesn't need to be loud to be felt.
-            You play softly in the spaces between ordinary moments — when we're
+            You play softly in the spaces between ordinary moments when we're
             just sitting together, when you laugh at something small, when you
             reach for my hand without thinking.
           </p>

@@ -21,12 +21,12 @@
           v-for="item in allPickerItems"
           :key="item.id"
           class="track-option"
-          :class="{ active: item.id !== 'note' && activeTrackId === item.id, 'is-note': item.id === 'note' }"
+          :class="{ active: item.id !== 'note' && activeTrackId === item.id }"
           role="menuitem"
           @click="item.id === 'note' ? openNote() : selectTrack(item.id)"
         >
           <span class="track-icon">{{ item.icon }}</span>
-          <span class="track-name" :class="{ 'note-title': item.id === 'note' }">{{ item.label }}</span>
+          <span class="track-name">{{ item.label }}</span>
           <span v-if="item.id !== 'note' && activeTrackId === item.id" class="track-check">✓</span>
         </button>
       </div>
@@ -107,9 +107,15 @@ const tracks: Track[] = [
   { id: 'lifegoeson', label: 'Life Goes On — BTS', icon: '🌸', videoId: '-5q5mZbe3V8', startSeconds: 0  },
 ]
 
-// 5th "track" is actually the hidden music note — looks like a real song
-const NOTE_ITEM = { id: 'note', label: 'a note, from me', icon: '💌' } as const
-const allPickerItems = [...tracks, NOTE_ITEM]
+// Hidden mystery slipped between Surreal and Life Goes On — looks like a real song
+const NOTE_ITEM: { id: string; label: string; icon: string; videoId?: string; startSeconds?: number } =
+  { id: 'note', label: 'Hidden Mystery', icon: '💌' }
+
+const allPickerItems: typeof NOTE_ITEM[] = [
+  ...tracks.slice(0, 3),     // Piano Only, A Thousand Years, Surreal — Justin
+  NOTE_ITEM,                 // 💌 Hidden Mystery  ← blends right in
+  ...tracks.slice(3),        // Life Goes On — BTS
+]
 
 /* ── Props / state ─────────────────────────────────────────────── */
 const props = defineProps<{ pendingAutoPlay?: boolean }>()
@@ -346,11 +352,6 @@ onUnmounted(() => {
 .track-icon { font-size: 1.1rem; flex-shrink: 0; }
 .track-name { font-family: 'Cormorant Garamond', serif; font-size: 0.95rem; flex: 1; letter-spacing: 0.02em; }
 .track-check { color: var(--sage); font-size: 0.85rem; font-weight: 600; }
-
-/* Note-disguised track */
-.is-note { border-top: 1px solid var(--parchment); margin-top: 0.3rem; padding-top: 0.85rem; }
-.note-title { font-style: italic; color: var(--ink-muted); font-size: 0.9rem; }
-.track-option.is-note:hover { background: rgba(232, 160, 176, 0.1); }
 
 /* Picker transition */
 .picker-fade-enter-active { transition: opacity 0.22s ease, transform 0.22s ease; }
