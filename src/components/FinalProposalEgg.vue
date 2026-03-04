@@ -234,8 +234,9 @@ defineExpose({ open })
   backdrop-filter: blur(40px);
   -webkit-backdrop-filter: blur(40px);
   z-index: 10010;
-  display: flex; align-items: center; justify-content: center;
-  overflow: hidden;
+  display: flex; align-items: flex-start; justify-content: center;
+  overflow-y: auto;
+  padding: 3rem 1.5rem;
 }
 
 .fp-bg-elements {

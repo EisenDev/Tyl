@@ -236,10 +236,10 @@ onUnmounted(() => document.removeEventListener('keydown', onKey))
   -webkit-backdrop-filter: blur(24px);
   z-index: 10001;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  padding: 2rem;
-  overflow: hidden;
+  padding: 3rem 1.5rem;
+  overflow-y: auto;
 }
 
 /* Tulip background accents */
@@ -599,13 +599,22 @@ onUnmounted(() => document.removeEventListener('keydown', onKey))
    MOBILE
 ══════════════════════════════════════════════════════════ */
 @media (max-width: 640px) {
-  .env-wrap  { width: 268px; height: 178px; }
-  .env-flap  { height: 90px; }
-  .fold-bottom { border-bottom-width: 89px; border-left-width: 134px; border-right-width: 134px; }
-  .fold-left   { border-left-width: 134px; border-top-width: 89px; border-bottom-width: 89px; }
-  .fold-right  { border-right-width: 134px; border-top-width: 89px; border-bottom-width: 89px; }
-  .env-input   { width: 230px; }
-  .letter-paper { padding: 1.8rem 1.4rem 1.6rem; max-height: 55vh; }
+  /* Scene stacks vertically, envelope on top, letter on bottom */
+  .egg-scene.is-revealed { flex-direction: column; gap: 1.5rem; }
+  /* Shrink the envelope so it fits alongside the input */
+  .env-wrap  { width: 230px; height: 153px; }
+  .env-flap  { height: 77px; }
+  .env-inner-letter { height: 128px; }
+  .env-inner-letter.rise { transform: translateY(-86px); }
+  .fold-bottom { border-bottom-width: 76px; border-left-width: 115px; border-right-width: 115px; }
+  .fold-left   { border-left-width: 115px; border-top-width: 76px; border-bottom-width: 76px; }
+  .fold-right  { border-right-width: 115px; border-top-width: 76px; border-bottom-width: 76px; }
+  /* Input takes full width */
+  .env-input   { width: 100%; max-width: 300px; }
+  /* Letter fills full width with reduced height/padding */
+  .letter-panel { max-width: 100%; }
+  .letter-paper { padding: 1.8rem 1.4rem 1.6rem; max-height: none; }
+  /* Hide less-important corner tulips on tiny screens */
   .egg-tulip   { display: none; }
   .egg-tl, .egg-tr { display: block; }
 }

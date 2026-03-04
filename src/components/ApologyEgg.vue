@@ -260,10 +260,10 @@ onUnmounted(() => document.removeEventListener('keydown', onKey))
   -webkit-backdrop-filter: blur(24px);
   z-index: 10004;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  padding: 2rem;
-  overflow: hidden;
+  padding: 3rem 1.5rem;
+  overflow-y: auto;
 }
 
 .ae-bg-glow {
@@ -589,10 +589,15 @@ onUnmounted(() => document.removeEventListener('keydown', onKey))
 
 /* Mobile */
 @media (max-width: 680px) {
-  .ae-scene { flex-direction: column; gap: 2rem; }
+  .ae-scene { flex-direction: column; gap: 1.5rem; }
+  .ae-scene.is-revealed, .ae-scene.is-opening { flex-direction: column; }
   .text-col { width: 100%; position: static; display: block; }
-  .ae-letter { position: static; }
-  .ae-riddle-card { max-width: 100%; }
+  .ae-letter { position: static; max-width: 100%; max-height: none; }
+  .ae-riddle-card { max-width: 100%; padding: 1.4rem 1rem; }
+  /* Compact the tulip vase so the riddle card isn't shoved down */
+  .tulip-vase-assy { width: 80px; height: 150px; }
+  .sorry-tulip { width: 60px; height: 130px; bottom: 45px; }
+  .vase { width: 55px; height: 55px; }
   .ae-tulip { display: none; }
   .ae-tl, .ae-tr { display: block; }
 }

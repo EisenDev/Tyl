@@ -221,10 +221,10 @@ onUnmounted(() => document.removeEventListener('keydown', onKey))
   -webkit-backdrop-filter: blur(24px);
   z-index: 10002;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  padding: 2rem;
-  overflow: hidden;
+  padding: 3rem 1.5rem;
+  overflow-y: auto;
 }
 
 .se-tulip { position: absolute; pointer-events: none; animation: seTulipFloat 9s ease-in-out infinite; }
@@ -528,11 +528,15 @@ onUnmounted(() => document.removeEventListener('keydown', onKey))
 
 /* Mobile */
 @media (max-width: 680px) {
-  .se-scene { flex-direction: column; gap: 2rem; }
-  .se-scene.is-riddle { flex-direction: column-reverse; }
-  .scroll-cylinder { width: 100px; height: 170px; }
-  .scroll-cylinder.unroll { width: 300px; height: 400px; }
-  .riddle-card { max-width: 100%; }
+  .se-scene { flex-direction: column; gap: 1.5rem; }
+  .se-scene.is-riddle { flex-direction: column; }
+  .se-scene.is-unrolling, .se-scene.is-revealed { flex-direction: column-reverse; }
+  .scroll-cylinder { width: 80px; height: 140px; }
+  .scroll-cylinder.unroll { width: 240px; height: 340px; }
+  .riddle-card { max-width: 100%; padding: 1.4rem 1rem; }
+  .riddle-text { font-size: 0.9rem; }
+  .scroll-letter { max-height: none; }
+  .sl-body { padding: 1.4rem 1.2rem; }
   .se-tulip { display: none; }
   .se-tl, .se-tr { display: block; }
 }
