@@ -468,3 +468,41 @@ h4 {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--sage-light);
 }
+/* ----------------------------------------------------------
+   RESPONSIVE — TABLET  (max 900px)
+---------------------------------------------------------- */
+@media (max-width: 900px) {
+  .section { padding: 6rem 2.8rem 4rem; }
+  .narrative-sentence { font-size: clamp(0.95rem, 2.2vw, 1.3rem) !important; }
+  .album-grid { columns: 2 !important; }
+}
+
+/* ----------------------------------------------------------
+   RESPONSIVE — MOBILE  (max 640px)
+---------------------------------------------------------- */
+@media (max-width: 640px) {
+  .section { padding: 5rem 1.4rem 3rem; }
+  .gate-wrapper  { gap: 1.6rem; padding: 2rem 1.4rem; }
+  .gate-title    { font-size: clamp(1.8rem, 10vw, 3rem); text-align: center; }
+  .gate-subtitle { font-size: 0.6rem; text-align: center; }
+  .gate-input-wrapper { width: 100%; padding: 0 0.5rem; }
+  .gate-input { width: 100%; font-size: 0.9rem; padding: 0.85rem 1.2rem; }
+  .gate-tulip { display: none; }
+  .gate-tulip--1, .gate-tulip--2 { display: block; }
+  .section-title { font-size: clamp(2rem, 9vw, 3rem); line-height: 1.15; }
+  .section-label { font-size: 0.58rem; }
+  .sage-divider  { margin: 1rem 0; }
+  .narrative-sentence { font-size: clamp(0.9rem, 4vw, 1.1rem) !important; line-height: 1.85; margin-bottom: 1rem; }
+  .album-grid { columns: 1 !important; margin-top: 2rem; }
+  .tulip-trigger-anchor { bottom: 1.2rem !important; left: 1.2rem !important; }
+  .audio-player         { bottom: 1.2rem !important; right: 1.2rem !important; gap: 0.35rem !important; }
+}
+
+/* ----------------------------------------------------------
+   RESPONSIVE — TINY  (max 380px)
+---------------------------------------------------------- */
+@media (max-width: 380px) {
+  .section       { padding: 4.5rem 1rem 2.5rem; }
+  .gate-title    { font-size: 1.7rem; }
+  .section-title { font-size: 1.8rem; }
+}
