@@ -19,14 +19,9 @@
       {{ albums.length }} albums — click any to open it.
     </p>
 
-    <!-- ── Loading state ───────────────────────────── -->
-    <div v-if="loading" class="album-loading">
-      <TulipSvg :size="40" :opacity="0.3" color="#86A789" />
-      <span>gathering memories…</span>
-    </div>
 
     <!-- ── Album Cover Grid ──────────────────────────── -->
-    <div v-else class="album-grid">
+    <div class="album-grid">
       <div
         v-for="album in albums"
         :key="album.id"
@@ -68,7 +63,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import TulipSvg from './TulipSvg.vue'
 import AlbumLightbox from './AlbumLightbox.vue'
 import { ALBUMS, type AlbumMeta } from '../data/albums'
@@ -86,13 +81,14 @@ const imagesByAlbum = computed<Record<string, string[]>>(() => {
   for (const [path, url] of Object.entries(allGlob)) {
     // path: /src/assets/albums/FOLDER/filename.jpg
     const parts = path.split('/')
-    const folder = parts[parts.length - 2] // second-to-last segment
+    const folder: string | undefined = parts[parts.length - 2]
+    if (!folder) continue                      // guard: skip if undefined
     if (!map[folder]) map[folder] = []
     map[folder].push(url)
   }
   // Sort alphabetically for consistent cover photo
-  for (const folder in map) {
-    map[folder].sort()
+  for (const key of Object.keys(map)) {
+    map[key]?.sort()
   }
   return map
 })
@@ -118,7 +114,6 @@ interface LightboxPayload {
 }
 
 const activeLightbox = ref<LightboxPayload | null>(null)
-const loading = ref(false)
 
 function openAlbum(album: AlbumMeta) {
   const images = imagesByAlbum.value[album.id]
