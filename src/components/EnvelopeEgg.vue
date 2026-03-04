@@ -601,8 +601,8 @@ onUnmounted(() => document.removeEventListener('keydown', onKey))
 @media (max-width: 640px) {
   /* Overlay scrollable on mobile only */
   .egg-overlay { align-items: flex-start; overflow-y: auto; padding: 2rem 1rem 4rem; }
-  /* Scene stacks: envelope on TOP, letter on BOTTOM */
-  .egg-scene.is-revealed { flex-direction: column; gap: 1.5rem; }
+  /* Envelope on TOP, letter scrollable BELOW */
+  .egg-scene.is-revealed { flex-direction: column-reverse; gap: 1.5rem; }
   /* Shrink the envelope on small screens */
   .env-wrap  { width: 230px; height: 153px; }
   .env-flap  { height: 77px; }

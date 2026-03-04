@@ -8,108 +8,58 @@
       aria-label="A secret scroll"
       @click.self="close"
     >
-      <!-- Ambient tulips -->
       <div class="se-tulip se-tl" aria-hidden="true"><TulipSvg :size="100" :opacity="0.09" color="#86A789" /></div>
       <div class="se-tulip se-tr" aria-hidden="true"><TulipSvg :size="80"  :opacity="0.08" color="#e8a0b0" /></div>
       <div class="se-tulip se-bl" aria-hidden="true"><TulipSvg :size="65"  :opacity="0.07" color="#b8a8d0" /></div>
       <div class="se-tulip se-br" aria-hidden="true"><TulipSvg :size="75"  :opacity="0.08" color="#d4a0a8" /></div>
-
       <button class="se-close" aria-label="Close" @click="close">✕</button>
 
-      <!-- ═══ SCENE ═══ -->
       <div class="se-scene" :class="`is-${phase}`">
 
-        <!-- LEFT: Riddle card (riddle phase) or Revealed letter (revealed phase) -->
-        <div class="text-col">
-
-          <!-- Revealed letter -->
-          <Transition name="letter-unfurl">
-            <div v-if="phase === 'revealed'" class="scroll-letter">
-              <div class="sl-body">
-                <p class="sl-salutation">To my favorite secret,</p>
-                <p class="sl-para sl-p1">
-                  If you are reading this, it means you know me better than anyone else in the world.
-                  You found this hidden space, just like you found the hidden parts of my heart that
-                  I didn't even know were there.
-                </p>
-                <p class="sl-para sl-p2">
-                  I know the main letter on this site talks about my flaws and my promises to grow,
-                  but I wanted a separate, secret place just to tell you how incredibly perfect you
-                  are to me. When I look at you, I don't just see the woman I love; I see my entire
-                  future. I see quiet Sunday mornings, loud laughter in the kitchen, and a lifetime
-                  of inside jokes that only we understand.
-                </p>
-                <p class="sl-para sl-p3">
-                  You are the most beautiful thing that has ever happened to me. Thank you for your
-                  patience, your grace, and your endless love. I am so lucky to be yours, and I will
-                  spend the rest of my life making sure you know that.
-                </p>
-                <p class="sl-para sl-p4">
-                  I love you, more than all the hidden words in the world could ever say.
-                </p>
-                <p class="sl-closing">Forever,</p>
-
-                <!-- Hint for EE#3: music player → Hidden Mystery -->
-                <p class="sl-hint">
-                  ✦ iii. not every song on the list is what it seems.<br>
-                  one of them is not a song at all.
-                </p>
-              </div>
+        <!-- LEFT: Riddle card (riddle phase only) -->
+        <Transition name="riddle-fade">
+          <div v-if="phase === 'riddle'" class="riddle-card">
+            <div class="riddle-seal" aria-hidden="true">
+              <svg viewBox="0 0 36 36" width="30" height="30">
+                <circle cx="18" cy="18" r="16" fill="#86A789" opacity="0.14"/>
+                <circle cx="18" cy="18" r="10" fill="#86A789" opacity="0.22"/>
+                <circle cx="18" cy="18" r="5"  fill="#86A789" opacity="0.4"/>
+              </svg>
             </div>
-          </Transition>
-
-          <!-- Riddle card -->
-          <Transition name="riddle-fade">
-            <div v-if="phase === 'riddle'" class="riddle-card">
-              <!-- Decorative wax seal top -->
-              <div class="riddle-seal" aria-hidden="true">
-                <svg viewBox="0 0 36 36" width="30" height="30">
-                  <circle cx="18" cy="18" r="16" fill="#86A789" opacity="0.14"/>
-                  <circle cx="18" cy="18" r="10" fill="#86A789" opacity="0.22"/>
-                  <circle cx="18" cy="18" r="5"  fill="#86A789" opacity="0.4"/>
-                </svg>
-              </div>
-
-              <p class="riddle-eyebrow">a riddle, to prove it's you</p>
-              <div class="riddle-divider"/>
-
-              <p class="riddle-text">
-                There was a day the seasons didn't matter and the clock didn't either.
-                It wasn't famous, no one wrote it in books — but for two hearts,
-                it was the beginning of everything.
-                <br/><br/>
-                <em>The day "you and I" stopped being strangers<br/>
-                and became something more beautiful.</em>
-                <br/><br/>
-                You know it by heart, beloved.<br/>
-                <span class="riddle-q">When did we begin?</span>
-              </p>
-
-              <div class="riddle-input-wrap">
-                <input
-                  ref="riddleInput"
-                  v-model="riddleAnswer"
-                  class="riddle-input"
-                  type="text"
-                  placeholder="our beginning…"
-                  :class="{ shake: shaking, correct: answerCorrect }"
-                  autocomplete="off"
-                  spellcheck="false"
-                  @input="onRiddleInput"
-                />
-                <p class="riddle-hint" :class="{ visible: shaking }">that's not quite it…</p>
-              </div>
+            <p class="riddle-eyebrow">a riddle, to prove it's you</p>
+            <div class="riddle-divider"/>
+            <p class="riddle-text">
+              There was a day the seasons didn't matter and the clock didn't either.
+              It wasn't famous, no one wrote it in books — but for two hearts,
+              it was the beginning of everything.
+              <br/><br/>
+              <em>The day "you and I" stopped being strangers<br/>
+              and became something more beautiful.</em>
+              <br/><br/>
+              You know it by heart, beloved.<br/>
+              <span class="riddle-q">When did we begin?</span>
+            </p>
+            <div class="riddle-input-wrap">
+              <input
+                ref="riddleInput"
+                v-model="riddleAnswer"
+                class="riddle-input"
+                type="text"
+                placeholder="our beginning…"
+                :class="{ shake: shaking, correct: answerCorrect }"
+                autocomplete="off"
+                spellcheck="false"
+                @input="onRiddleInput"
+              />
+              <p class="riddle-hint" :class="{ visible: shaking }">that's not quite it…</p>
             </div>
-          </Transition>
+          </div>
+        </Transition>
 
-        </div><!-- /text-col -->
-
-        <!-- RIGHT: SCROLL object (always visible) -->
+        <!-- RIGHT: Scroll object — letter revealed INSIDE the expanded cylinder -->
         <div class="scroll-wrap" :class="scrollWrapClass">
-
-          <!-- Ribbon (slides off during unrolling) -->
           <div class="ribbon-wrap" :class="{ 'ribbon-slide': phase === 'unrolling' || phase === 'revealed' }">
-            <svg class="ribbon-svg" viewBox="0 0 90 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg class="ribbon-svg" viewBox="0 0 90 80" fill="none">
               <path d="M10 40 Q45 30 80 40" stroke="#86A789" stroke-width="4" stroke-linecap="round"/>
               <path d="M10 48 Q45 58 80 48" stroke="#86A789" stroke-width="3.5" stroke-linecap="round"/>
               <path d="M45 40 C35 28 18 25 15 32 C12 39 28 40 45 44Z" fill="#86A789" opacity="0.7"/>
@@ -120,23 +70,54 @@
             </svg>
           </div>
 
-          <!-- Scroll cylinder -->
           <div class="scroll-cylinder" :class="{ unroll: phase === 'unrolling' || phase === 'revealed' }">
-            <!-- End caps -->
             <div class="scroll-cap scroll-cap-top"/>
             <div class="scroll-cap scroll-cap-bot"/>
-            <!-- Paper texture -->
             <div class="scroll-paper-lines">
               <span/><span/><span/><span/><span/><span/><span/><span/>
             </div>
+
+            <!-- Letter lives INSIDE the cylinder so position:absolute fills it -->
+            <Transition name="letter-unfurl">
+              <div v-if="phase === 'revealed'" class="scroll-letter">
+                <div class="sl-body">
+                  <p class="sl-salutation">To my favorite secret,</p>
+                  <p class="sl-para sl-p1">
+                    If you are reading this, it means you know me better than anyone else in the world.
+                    You found this hidden space, just like you found the hidden parts of my heart that
+                    I didn't even know were there.
+                  </p>
+                  <p class="sl-para sl-p2">
+                    I know the main letter on this site talks about my flaws and my promises to grow,
+                    but I wanted a separate, secret place just to tell you how incredibly perfect you
+                    are to me. When I look at you, I don't just see the woman I love; I see my entire
+                    future. I see quiet Sunday mornings, loud laughter in the kitchen, and a lifetime
+                    of inside jokes that only we understand.
+                  </p>
+                  <p class="sl-para sl-p3">
+                    You are the most beautiful thing that has ever happened to me. Thank you for your
+                    patience, your grace, and your endless love. I am so lucky to be yours, and I will
+                    spend the rest of my life making sure you know that.
+                  </p>
+                  <p class="sl-para sl-p4">
+                    I love you, more than all the hidden words in the world could ever say.
+                  </p>
+                  <p class="sl-closing">Forever,</p>
+                  <p class="sl-hint">
+                    ✦ iii. not every song on the list is what it seems.<br>
+                    one of them is not a song at all.
+                  </p>
+                </div>
+              </div>
+            </Transition>
           </div>
+        </div>
 
-        </div><!-- /scroll-wrap -->
-
-      </div><!-- /se-scene -->
+      </div>
     </div>
   </Transition>
 </template>
+
 
 <script setup lang="ts">
 import { ref, computed, nextTick, onMounted, onUnmounted } from 'vue'

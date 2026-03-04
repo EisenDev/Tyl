@@ -60,7 +60,7 @@
                 <div class="fp-divider"></div>
                 
                 <p class="fp-desc">
-                  Five keys lay scattered across the journey.<br>
+                  Six keys lay scattered across the journey.<br>
                   Place them within the ancient stones.
                 </p>
                 
@@ -94,6 +94,14 @@
                     <div class="input-stone">
                       <input v-model="keys[4]" type="text" placeholder="V" :class="{ correct: isInputCorrect(4) }" spellcheck="false" autocomplete="off" />
                       <div class="stone-glow" :class="{ active: isInputCorrect(4) }"></div>
+                    </div>
+                  </div>
+
+                  <!-- Row 3 (1 Input) -->
+                  <div class="fp-row row-1">
+                    <div class="input-stone">
+                      <input v-model="keys[5]" type="text" placeholder="VI" :class="{ correct: isInputCorrect(5) }" spellcheck="false" autocomplete="off" />
+                      <div class="stone-glow" :class="{ active: isInputCorrect(5) }"></div>
                     </div>
                   </div>
                 </div>
@@ -139,7 +147,7 @@ const phase = ref<Phase>('idle')
 
 const router = useRouter()
 
-const keys = ref(['', '', '', '', ''])
+const keys = ref(['', '', '', '', '', ''])
 
 // Valid answers logic (can be entered in any order)
 const ANSWERS = [
@@ -156,7 +164,10 @@ const ANSWERS = [
   ['sorry', 'imsorry', 'iamsorry'],
   
   // 5: Watcher Egg
-  ['greentulipandheart', 'greentulipheart', 'greentulipandgreenheart']
+  ['greentulipandheart', 'greentulipheart', 'greentulipandgreenheart'],
+
+  // 6: Names
+  ['eisen', 'peinshiii', 'peinshi']
 ]
 
 function normalize(s: string) {
@@ -180,7 +191,7 @@ function isInputCorrect(index: number): boolean {
 
 const duplicateWarning = computed(() => {
   const matchedGroups = new Set<number>()
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 6; i++) {
     const val = normalize(keys.value[i] || '')
     const match = getMatchedGroupIndex(val)
     if (match !== -1) {
@@ -195,7 +206,7 @@ const allCorrect = computed(() => {
   if (duplicateWarning.value) return false
   const matchedGroups = new Set<number>()
   let countCorrect = 0
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 6; i++) {
     const val = normalize(keys.value[i] || '')
     const match = getMatchedGroupIndex(val)
     if (match !== -1) {
@@ -203,12 +214,12 @@ const allCorrect = computed(() => {
       countCorrect++
     }
   }
-  return countCorrect === 5 && matchedGroups.size === 5
+  return countCorrect === 6 && matchedGroups.size === 6
 })
 
 function open() {
   phase.value = 'keys'
-  keys.value = ['', '', '', '', '']
+  keys.value = ['', '', '', '', '', '']
 }
 
 function close() {
