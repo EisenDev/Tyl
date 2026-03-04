@@ -2,7 +2,18 @@
   <nav class="site-nav" role="navigation" aria-label="Main">
     <a href="#" class="nav-brand">To My Beloved</a>
 
-    <!-- Desktop links -->
+    <!-- Centre: Philippine date — clickable -->
+    <button
+      id="nav-date-btn"
+      class="nav-date"
+      :title="`Open today's word — ${phDate}`"
+      @click="dailyOpen = true"
+    >
+      <span class="nav-date-icon">📅</span>
+      <span class="nav-date-text">{{ phDate }}</span>
+    </button>
+
+    <!-- Desktop nav links -->
     <ul class="nav-links">
       <li><a href="#narrative">The Letter</a></li>
       <li><a href="#album">The Archive</a></li>
@@ -23,15 +34,31 @@
     <Transition name="nav-drop">
       <div v-if="menuOpen" class="nav-mobile-menu" @click="menuOpen = false">
         <a href="#narrative" class="nav-mobile-link">The Letter</a>
-        <a href="#album"    class="nav-mobile-link">The Archive</a>
+        <a href="#album"     class="nav-mobile-link">The Archive</a>
       </div>
     </Transition>
   </nav>
+
+  <!-- Daily modal (rendered outside nav for z-index) -->
+  <DailyModal v-model:open="dailyOpen" />
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-const menuOpen = ref(false)
+import { ref, onMounted } from 'vue'
+import DailyModal from './DailyModal.vue'
+
+const menuOpen  = ref(false)
+const dailyOpen = ref(false)
+const phDate    = ref('')
+
+function computePhDate() {
+  const ph = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila' }))
+  const mm = String(ph.getMonth() + 1).padStart(2, '0')
+  const dd = String(ph.getDate()).padStart(2, '0')
+  phDate.value = `${mm}/${dd}/${ph.getFullYear()}`
+}
+
+onMounted(computePhDate)
 </script>
 
 <style scoped>
@@ -43,8 +70,8 @@ const menuOpen = ref(false)
   z-index: 100;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 1.4rem 3rem;
+  padding: 0 3rem;
+  height: 58px;
   background: rgba(250, 249, 246, 0.88);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
@@ -58,13 +85,48 @@ const menuOpen = ref(false)
   color: var(--ink);
   text-decoration: none;
   font-weight: 500;
+  flex-shrink: 0;
 }
 
+/* ── Date button — centred ─────────────────────────────── */
+.nav-date {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.35rem 0.8rem;
+  border-radius: 8px;
+  transition: background 0.25s;
+}
+
+.nav-date:hover {
+  background: rgba(134, 167, 137, 0.08);
+}
+
+.nav-date-icon { font-size: 0.75rem; line-height: 1; }
+
+.nav-date-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.9rem;
+  letter-spacing: 0.14em;
+  color: var(--ink-muted);
+  font-weight: 500;
+  transition: color 0.25s;
+}
+
+.nav-date:hover .nav-date-text { color: var(--sage-dark); }
+
+/* ── Desktop links ─────────────────────────────────────── */
 .nav-links {
   display: flex;
   gap: 2.5rem;
   list-style: none;
-  margin: 0;
+  margin: 0 0 0 auto;
   padding: 0;
 }
 .nav-links a {
@@ -86,6 +148,7 @@ const menuOpen = ref(false)
   border: none;
   cursor: pointer;
   padding: 0.4rem;
+  margin-left: auto;
 }
 .nav-hamburger span {
   display: block;
@@ -126,7 +189,7 @@ const menuOpen = ref(false)
 .nav-mobile-link:last-child { border-bottom: none; }
 .nav-mobile-link:hover { color: var(--sage-dark); }
 
-/* ── Dropdown transition ───────────────────────────────── */
+/* Dropdown transition */
 .nav-drop-enter-active { transition: opacity 0.22s ease, transform 0.22s ease; }
 .nav-drop-leave-active { transition: opacity 0.18s ease, transform 0.18s ease; }
 .nav-drop-enter-from   { opacity: 0; transform: translateY(-8px); }
@@ -134,8 +197,11 @@ const menuOpen = ref(false)
 
 /* ── Mobile breakpoint ─────────────────────────────────── */
 @media (max-width: 640px) {
-  .site-nav    { padding: 1.1rem 1.4rem; }
-  .nav-links   { display: none; }
+  .site-nav      { padding: 0 1.2rem; }
+  .nav-links     { display: none; }
   .nav-hamburger { display: flex; }
+  /* Keep date centred but a bit smaller */
+  .nav-date-text { font-size: 0.8rem; letter-spacing: 0.1em; }
+  .nav-date-icon { display: none; }
 }
 </style>
