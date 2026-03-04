@@ -96,7 +96,8 @@ onUnmounted(() => document.removeEventListener('keydown', onKeydown))
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
+  padding: 4rem 2rem;   /* generous vertical breathing room */
+  overflow-y: auto;
 }
 
 /* ── Card ──────────────────────────────────────────────── */
@@ -105,11 +106,13 @@ onUnmounted(() => document.removeEventListener('keydown', onKeydown))
   background: rgba(255, 255, 255, 0.97);
   border: 1px solid var(--parchment);
   border-radius: 22px;
-  max-width: 500px;
+  max-width: 450px;               /* slightly narrower — more letter-like */
   width: 100%;
-  padding: 3rem 3rem 2.5rem;
+  padding: 2.8rem 2.8rem 2.4rem;
   box-shadow: 0 28px 80px rgba(0, 0, 0, 0.09), 0 4px 16px rgba(232, 160, 176, 0.08);
   overflow: hidden;
+  max-height: 88vh;
+  overflow-y: auto;
 }
 
 .mn-tulip { position: absolute; pointer-events: none; }

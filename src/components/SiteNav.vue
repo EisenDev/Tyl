@@ -9,7 +9,13 @@
       :title="`Open today's word — ${phDate}`"
       @click="dailyOpen = true"
     >
-      <span class="nav-date-icon">📅</span>
+      <svg class="nav-date-icon" viewBox="0 0 16 16" width="13" height="13" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <ellipse cx="8" cy="4"  rx="1.8" ry="3.2" fill="#86A789" opacity="0.55"/>
+        <ellipse cx="8" cy="12" rx="1.8" ry="3.2" fill="#86A789" opacity="0.55"/>
+        <ellipse cx="4"  cy="8" rx="3.2" ry="1.8" fill="#86A789" opacity="0.55"/>
+        <ellipse cx="12" cy="8" rx="3.2" ry="1.8" fill="#86A789" opacity="0.55"/>
+        <circle  cx="8"  cy="8" r="2.2"            fill="#86A789" opacity="0.82"/>
+      </svg>
       <span class="nav-date-text">{{ phDate }}</span>
     </button>
 
