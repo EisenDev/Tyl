@@ -19,7 +19,7 @@
 
     <!-- Brand -->
     <div class="gate-subtitle">a personal space</div>
-    <h1 class="gate-title">To my beloved</h1>
+    <h1 class="gate-title">To my <span class="beloved-egg" @click="eggRef?.open()">beloved</span></h1>
     <div class="sage-divider" style="margin: 0 auto;" />
 
     <!-- Passphrase input -->
@@ -40,11 +40,17 @@
       <p class="gate-hint">{{ hint }}</p>
     </div>
   </div>
+
+  <!-- Easter egg envelope (rendered outside gate div for z-index) -->
+  <EnvelopeEgg ref="eggRef" />
 </template>
 
 <script setup lang="ts">
 import { ref, nextTick, onMounted } from 'vue'
 import TulipSvg from './TulipSvg.vue'
+import EnvelopeEgg from './EnvelopeEgg.vue'
+
+const eggRef = ref<InstanceType<typeof EnvelopeEgg> | null>(null)
 
 const emit = defineEmits<{
   (e: 'unlock'): void
@@ -110,5 +116,12 @@ function tryUnlock() {
   font-family: 'Cormorant Garamond', serif;
   font-style: italic;
   transition: opacity 0.3s;
+}
+
+/* Easter-egg trigger — plain, no hover, just a cursor */
+.beloved-egg {
+  cursor: pointer;
+  color: inherit;   /* stays exactly the same black as surrounding text */
+  /* zero hover/focus effects intentional — it IS the secret */
 }
 </style>
