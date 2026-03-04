@@ -19,36 +19,10 @@
       <!-- ═══ SCENE ═══ -->
       <div class="se-scene" :class="`is-${phase}`">
 
-        <!-- LEFT: SCROLL (always in scene, transforms based on phase) -->
-        <div class="scroll-wrap" :class="scrollWrapClass">
+        <!-- LEFT: Riddle card (riddle phase) or Revealed letter (revealed phase) -->
+        <div class="text-col">
 
-          <!-- Ribbon (slides off during unrolling) -->
-          <div class="ribbon-wrap" :class="{ 'ribbon-slide': phase === 'unrolling' || phase === 'revealed' }">
-            <svg class="ribbon-svg" viewBox="0 0 90 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <!-- Ribbon body across scroll -->
-              <path d="M10 40 Q45 30 80 40" stroke="#86A789" stroke-width="4" stroke-linecap="round"/>
-              <path d="M10 48 Q45 58 80 48" stroke="#86A789" stroke-width="3.5" stroke-linecap="round"/>
-              <!-- Bow on center left -->
-              <path d="M45 40 C35 28 18 25 15 32 C12 39 28 40 45 44Z" fill="#86A789" opacity="0.7"/>
-              <path d="M45 44 C35 56 18 55 15 48 C12 41 28 42 45 40Z" fill="#86A789" opacity="0.7"/>
-              <path d="M45 40 C55 28 72 25 75 32 C78 39 62 40 45 44Z" fill="#a8c4aa" opacity="0.7"/>
-              <path d="M45 44 C55 56 72 55 75 48 C78 41 62 42 45 40Z" fill="#a8c4aa" opacity="0.7"/>
-              <circle cx="45" cy="42" r="5" fill="#86A789" opacity="0.85"/>
-            </svg>
-          </div>
-
-          <!-- Scroll cylinder -->
-          <div class="scroll-cylinder" :class="{ unroll: phase === 'unrolling' || phase === 'revealed' }">
-            <!-- End caps -->
-            <div class="scroll-cap scroll-cap-top"/>
-            <div class="scroll-cap scroll-cap-bot"/>
-            <!-- Paper texture -->
-            <div class="scroll-paper-lines">
-              <span/><span/><span/><span/><span/><span/><span/><span/>
-            </div>
-          </div>
-
-          <!-- The full letter (revealed after unroll) -->
+          <!-- Revealed letter -->
           <Transition name="letter-unfurl">
             <div v-if="phase === 'revealed'" class="scroll-letter">
               <div class="sl-body">
@@ -83,51 +57,81 @@
               </div>
             </div>
           </Transition>
-        </div><!-- /scroll-wrap -->
 
-        <!-- RIGHT: RIDDLE NOTE (shown in 'riddle' phase only) -->
-        <Transition name="riddle-fade">
-          <div v-if="phase === 'riddle'" class="riddle-card">
-            <!-- Decorative wax seal top -->
-            <div class="riddle-seal" aria-hidden="true">
-              <svg viewBox="0 0 36 36" width="30" height="30">
-                <circle cx="18" cy="18" r="16" fill="#86A789" opacity="0.14"/>
-                <circle cx="18" cy="18" r="10" fill="#86A789" opacity="0.22"/>
-                <circle cx="18" cy="18" r="5"  fill="#86A789" opacity="0.4"/>
-              </svg>
+          <!-- Riddle card -->
+          <Transition name="riddle-fade">
+            <div v-if="phase === 'riddle'" class="riddle-card">
+              <!-- Decorative wax seal top -->
+              <div class="riddle-seal" aria-hidden="true">
+                <svg viewBox="0 0 36 36" width="30" height="30">
+                  <circle cx="18" cy="18" r="16" fill="#86A789" opacity="0.14"/>
+                  <circle cx="18" cy="18" r="10" fill="#86A789" opacity="0.22"/>
+                  <circle cx="18" cy="18" r="5"  fill="#86A789" opacity="0.4"/>
+                </svg>
+              </div>
+
+              <p class="riddle-eyebrow">a riddle, to prove it's you</p>
+              <div class="riddle-divider"/>
+
+              <p class="riddle-text">
+                There was a day the seasons didn't matter and the clock didn't either.
+                It wasn't famous, no one wrote it in books — but for two hearts,
+                it was the beginning of everything.
+                <br/><br/>
+                <em>The day "you and I" stopped being strangers<br/>
+                and became something more beautiful.</em>
+                <br/><br/>
+                You know it by heart, beloved.<br/>
+                <span class="riddle-q">When did we begin?</span>
+              </p>
+
+              <div class="riddle-input-wrap">
+                <input
+                  ref="riddleInput"
+                  v-model="riddleAnswer"
+                  class="riddle-input"
+                  type="text"
+                  placeholder="our beginning…"
+                  :class="{ shake: shaking, correct: answerCorrect }"
+                  autocomplete="off"
+                  spellcheck="false"
+                  @input="onRiddleInput"
+                />
+                <p class="riddle-hint" :class="{ visible: shaking }">that's not quite it…</p>
+              </div>
             </div>
+          </Transition>
 
-            <p class="riddle-eyebrow">a riddle, to prove it's you</p>
-            <div class="riddle-divider"/>
+        </div><!-- /text-col -->
 
-            <p class="riddle-text">
-              There was a day the seasons didn't matter and the clock didn't either.
-              It wasn't famous, no one wrote it in books — but for two hearts,
-              it was the beginning of everything.
-              <br/><br/>
-              <em>The day "you and I" stopped being strangers<br/>
-              and became something more beautiful.</em>
-              <br/><br/>
-              You know it by heart, beloved.<br/>
-              <span class="riddle-q">When did we begin?</span>
-            </p>
+        <!-- RIGHT: SCROLL object (always visible) -->
+        <div class="scroll-wrap" :class="scrollWrapClass">
 
-            <div class="riddle-input-wrap">
-              <input
-                ref="riddleInput"
-                v-model="riddleAnswer"
-                class="riddle-input"
-                type="text"
-                placeholder="our beginning…"
-                :class="{ shake: shaking, correct: answerCorrect }"
-                autocomplete="off"
-                spellcheck="false"
-                @input="onRiddleInput"
-              />
-              <p class="riddle-hint" :class="{ visible: shaking }">that's not quite it…</p>
+          <!-- Ribbon (slides off during unrolling) -->
+          <div class="ribbon-wrap" :class="{ 'ribbon-slide': phase === 'unrolling' || phase === 'revealed' }">
+            <svg class="ribbon-svg" viewBox="0 0 90 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M10 40 Q45 30 80 40" stroke="#86A789" stroke-width="4" stroke-linecap="round"/>
+              <path d="M10 48 Q45 58 80 48" stroke="#86A789" stroke-width="3.5" stroke-linecap="round"/>
+              <path d="M45 40 C35 28 18 25 15 32 C12 39 28 40 45 44Z" fill="#86A789" opacity="0.7"/>
+              <path d="M45 44 C35 56 18 55 15 48 C12 41 28 42 45 40Z" fill="#86A789" opacity="0.7"/>
+              <path d="M45 40 C55 28 72 25 75 32 C78 39 62 40 45 44Z" fill="#a8c4aa" opacity="0.7"/>
+              <path d="M45 44 C55 56 72 55 75 48 C78 41 62 42 45 40Z" fill="#a8c4aa" opacity="0.7"/>
+              <circle cx="45" cy="42" r="5" fill="#86A789" opacity="0.85"/>
+            </svg>
+          </div>
+
+          <!-- Scroll cylinder -->
+          <div class="scroll-cylinder" :class="{ unroll: phase === 'unrolling' || phase === 'revealed' }">
+            <!-- End caps -->
+            <div class="scroll-cap scroll-cap-top"/>
+            <div class="scroll-cap scroll-cap-bot"/>
+            <!-- Paper texture -->
+            <div class="scroll-paper-lines">
+              <span/><span/><span/><span/><span/><span/><span/><span/>
             </div>
           </div>
-        </Transition>
+
+        </div><!-- /scroll-wrap -->
 
       </div><!-- /se-scene -->
     </div>
@@ -221,10 +225,10 @@ onUnmounted(() => document.removeEventListener('keydown', onKey))
   -webkit-backdrop-filter: blur(24px);
   z-index: 10002;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
-  padding: 3rem 1.5rem;
-  overflow-y: auto;
+  padding: 2rem;
+  overflow: hidden;
 }
 
 .se-tulip { position: absolute; pointer-events: none; animation: seTulipFloat 9s ease-in-out infinite; }
@@ -251,7 +255,7 @@ onUnmounted(() => document.removeEventListener('keydown', onKey))
 .scroll-egg-fade-enter-from, .scroll-egg-fade-leave-to { opacity: 0; }
 
 /* ══════════════════════════════════════════════════════════
-   SCENE — row: scroll LEFT, riddle card RIGHT
+   SCENE — LEFT: text/riddle, RIGHT: scroll object
 ══════════════════════════════════════════════════════════ */
 .se-scene {
   display: flex;
@@ -259,12 +263,22 @@ onUnmounted(() => document.removeEventListener('keydown', onKey))
   justify-content: center;
   gap: 3.5rem;
   width: 100%;
-  max-width: 820px;
+  max-width: 860px;
 }
 .se-scene.is-unrolling,
 .se-scene.is-revealed {
-  gap: 0;
+  gap: 3rem;
   justify-content: center;
+}
+
+/* Text column (left side — riddle card or revealed letter) */
+.text-col {
+  flex: 1;
+  max-width: 420px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -528,8 +542,11 @@ onUnmounted(() => document.removeEventListener('keydown', onKey))
 
 /* Mobile */
 @media (max-width: 680px) {
-  .se-scene { flex-direction: column; gap: 1.5rem; }
-  .se-scene.is-riddle { flex-direction: column; }
+  /* Overlay: scrollable on mobile */
+  .se-overlay { align-items: flex-start; overflow-y: auto; padding: 2rem 1rem 4rem; }
+  /* Scene: scroll object on TOP, riddle/letter on BOTTOM */
+  .se-scene { flex-direction: column-reverse; gap: 1.5rem; }
+  .se-scene.is-riddle { flex-direction: column-reverse; }
   .se-scene.is-unrolling, .se-scene.is-revealed { flex-direction: column-reverse; }
   .scroll-cylinder { width: 80px; height: 140px; }
   .scroll-cylinder.unroll { width: 240px; height: 340px; }

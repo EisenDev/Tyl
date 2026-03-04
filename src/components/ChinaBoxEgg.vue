@@ -241,10 +241,10 @@ onUnmounted(() => document.removeEventListener('keydown', onKey))
   -webkit-backdrop-filter: blur(24px);
   z-index: 10003;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
-  padding: 3rem 1.5rem;
-  overflow-y: auto;
+  padding: 2rem;
+  overflow: hidden;
 }
 
 /* Centered warm glow behind box */
@@ -669,11 +669,14 @@ onUnmounted(() => document.removeEventListener('keydown', onKey))
    MOBILE
 ══════════════════════════════════════════════════════════ */
 @media (max-width: 680px) {
+  /* Overlay: scrollable on mobile only */
+  .cb-overlay { align-items: flex-start; overflow-y: auto; padding: 2rem 1rem 4rem; }
+  /* Scene: box on TOP, riddle/letter on BOTTOM */
   .cb-scene { flex-direction: column; gap: 1.5rem; padding: 0.5rem 0; }
   .cb-scene.is-revealed { flex-direction: column-reverse; }
   .text-col { width: 100%; position: static; display: block; }
   .cb-letter { position: static; max-width: 100%; }
-  /* Smaller box on mobile so nothing gets cut off */
+  /* Smaller box on mobile */
   .china-box { width: 180px; height: 135px; }
   .china-lid { height: 68px; }
   .china-body { height: 67px; }
@@ -682,7 +685,6 @@ onUnmounted(() => document.removeEventListener('keydown', onKey))
   .med-ring.med-r2 { width: 32px; height: 32px; }
   .med-ring.med-r3 { width: 20px; height: 20px; }
   .med-char { font-size: 1rem; }
-  /* Riddle card fills width */
   .cb-riddle-card { max-width: 100%; padding: 1.2rem 1rem; }
   .cr-riddle { font-size: 0.9rem; line-height: 1.7; }
   .cb-letter { max-width: 100%; }

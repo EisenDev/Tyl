@@ -260,10 +260,10 @@ onUnmounted(() => document.removeEventListener('keydown', onKey))
   -webkit-backdrop-filter: blur(24px);
   z-index: 10004;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
-  padding: 3rem 1.5rem;
-  overflow-y: auto;
+  padding: 2rem;
+  overflow: hidden;
 }
 
 .ae-bg-glow {
@@ -587,14 +587,18 @@ onUnmounted(() => document.removeEventListener('keydown', onKey))
 .ae-riddle-fade-enter-from   { opacity: 0; transform: translateX(16px); }
 .ae-riddle-fade-leave-to     { opacity: 0; transform: translateX(-16px) scale(0.95); }
 
+
 /* Mobile */
 @media (max-width: 680px) {
+  /* Overlay scrollable on mobile only */
+  .ae-overlay { align-items: flex-start; overflow-y: auto; padding: 2rem 1rem 4rem; }
+  /* Vase on TOP, riddle/letter on BOTTOM */
   .ae-scene { flex-direction: column; gap: 1.5rem; }
   .ae-scene.is-revealed, .ae-scene.is-opening { flex-direction: column; }
   .text-col { width: 100%; position: static; display: block; }
   .ae-letter { position: static; max-width: 100%; max-height: none; }
   .ae-riddle-card { max-width: 100%; padding: 1.4rem 1rem; }
-  /* Compact the tulip vase so the riddle card isn't shoved down */
+  /* Compact the tulip vase so it doesn't eat vertical space */
   .tulip-vase-assy { width: 80px; height: 150px; }
   .sorry-tulip { width: 60px; height: 130px; bottom: 45px; }
   .vase { width: 55px; height: 55px; }
@@ -602,3 +606,4 @@ onUnmounted(() => document.removeEventListener('keydown', onKey))
   .ae-tl, .ae-tr { display: block; }
 }
 </style>
+

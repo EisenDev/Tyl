@@ -214,8 +214,8 @@ onUnmounted(() => document.removeEventListener('keydown', onKey))
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   z-index: 10005;
-  display: flex; align-items: flex-start; justify-content: center;
-  padding: 3rem 1.5rem; overflow-y: auto;
+  display: flex; align-items: center; justify-content: center;
+  padding: 2rem; overflow: hidden;
 }
 
 .we-bg-glow {
@@ -399,13 +399,16 @@ onUnmounted(() => document.removeEventListener('keydown', onKey))
 .we-riddle-fade-leave-to     { opacity: 0; transform: translateX(16px) scale(0.95); }
 
 @media (max-width: 680px) {
+  /* Overlay: scrollable on mobile only */
+  .we-overlay { align-items: flex-start; overflow-y: auto; padding: 2rem 1rem 4rem; }
+  /* Desktop stays row; mobile: icon on TOP, text/riddle on BOTTOM */
   .we-scene { flex-direction: column; gap: 1.5rem; }
   .we-scene.is-revealed { flex-direction: column; }
   .text-col { width: 100%; position: static; display: block; }
   .we-letter { position: static; max-height: none; }
   .we-riddle-card { max-width: 100%; padding: 1.4rem 1rem; }
   .wr-riddle { font-size: 0.9rem; }
-  /* Shrink the icon so it doesn't take up all vertical space */
+  /* Shrink the icon so it doesn't eat vertical space */
   .giant-icon-wrap { width: 100px; height: 100px; }
   .giant-icon { width: 60px; height: 60px; }
   .gi-heart { width: 54px; height: 54px; }

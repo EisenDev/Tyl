@@ -105,10 +105,9 @@ onUnmounted(() => document.removeEventListener('keydown', onKeydown))
   -webkit-backdrop-filter: blur(22px);
   z-index: 1100;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
-  padding: 3rem 1.5rem;
-  overflow-y: auto;
+  padding: 2rem;
 }
 
 /* ── Modal ────────────────────────────────────── */
@@ -122,7 +121,11 @@ onUnmounted(() => document.removeEventListener('keydown', onKeydown))
   padding: 3.2rem 3rem 2.5rem;
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.10), 0 4px 16px rgba(134,167,137,0.08);
   overflow: hidden;
-  margin: auto 0;
+}
+
+@media (max-width: 640px) {
+  .secret-overlay { align-items: flex-start; overflow-y: auto; padding: 2rem 1rem 4rem; }
+  .secret-modal { padding: 2.4rem 1.8rem 2rem; }
 }
 
 /* ── Tulip motifs inside the modal ────────────── */
