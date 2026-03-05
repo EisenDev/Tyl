@@ -19,7 +19,7 @@
         @mousedown="startHold"
         @mouseup="cancelHold"
         @mouseleave="cancelHold"
-        @touchstart.prevent="startHold"
+        @touchstart="startHold"
         @touchend="cancelHold"
         @touchcancel="cancelHold"
       >

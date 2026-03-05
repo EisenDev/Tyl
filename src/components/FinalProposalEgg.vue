@@ -113,6 +113,10 @@
                     </p>
                   </transition>
 
+                  <p class="fp-beautiful-note">
+                    We will open this together when the right time and right moment comes.
+                  </p>
+
                   <button class="fp-submit" :class="{ ready: allCorrect }" :disabled="!allCorrect" @click="openDoor">
                     <span class="btn-rings"></span>
                     <span class="btn-text">{{ allCorrect ? 'Unlock the door' : 'Gathering the keys...' }}</span>
