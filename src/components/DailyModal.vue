@@ -135,7 +135,7 @@ async function fetchDaily() {
 }
 
 /* Fetch when opened, lazy */
-watch(() => props.open, (v) => { if (v && !content.value.verse.text) fetchDaily() })
+watch(() => props.open, (v) => { if (v) fetchDaily() })
 onMounted(computePhDate)
 
 function onKeydown(e: KeyboardEvent) {
