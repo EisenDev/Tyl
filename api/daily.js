@@ -62,15 +62,9 @@ Respond ONLY with this exact JSON (no markdown, no extra text):
 
         let parsed = FALLBACK
         try {
-            // responseMimeType: 'application/json' usually returns clean JSON
             parsed = JSON.parse(raw)
         } catch (e) {
-            const m = raw.match(/\{[\s\S]*\}/)
-            if (m) {
-                try { parsed = JSON.parse(m[0]) } catch { parsed = { ...FALLBACK, _debug: `Parse error on match: ${m[0]}` } }
-            } else {
-                parsed = { ...FALLBACK, _debug: `Parse error on raw: ${raw}` }
-            }
+            parsed = { ...FALLBACK, _debug_data: data, _debug_raw: raw }
         }
 
         // Tell Vercel CDN to cache for exactly 24 h → same date always same response
