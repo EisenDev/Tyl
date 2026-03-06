@@ -52,8 +52,9 @@ Respond ONLY with this exact JSON (no markdown, no extra text):
         )
 
         if (!geminiRes.ok) {
+            const txt = await geminiRes.text()
             console.error('Gemini HTTP error', geminiRes.status)
-            return res.status(200).json(FALLBACK)
+            return res.status(200).json({ ...FALLBACK, _debug: `HTTP ${geminiRes.status}: ${txt}` })
         }
 
         const data = await geminiRes.json()
@@ -63,7 +64,7 @@ Respond ONLY with this exact JSON (no markdown, no extra text):
         try {
             parsed = JSON.parse(raw)
         } catch {
-            parsed = FALLBACK
+            parsed = { ...FALLBACK, _debug: `Parse error on: ${raw}` }
         }
 
         // Tell Vercel CDN to cache for exactly 24 h → same date always same response
