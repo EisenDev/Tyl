@@ -16,7 +16,7 @@ export default async function handler(req, res) {
     if (!date) return res.status(400).json({ error: 'date query param required' })
 
     const apiKey = process.env.GEMINI_API_KEY
-    const model = process.env.GEMINI_MODEL || 'gemini-2.5-flash'
+    const model = process.env.GEMINI_MODEL || 'gemini-1.5-flash'
 
     if (!apiKey) {
         console.warn('GEMINI_API_KEY not set — returning fallback')
