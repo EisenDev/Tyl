@@ -20,7 +20,7 @@ export default async function handler(req, res) {
 
     if (!apiKey) {
         console.warn('GEMINI_API_KEY not set — returning fallback')
-        return res.status(200).json(FALLBACK)
+        return res.status(200).json({ ...FALLBACK, _debug: 'NO_API_KEY_FOUND' })
     }
 
     const prompt = `Today's date is ${date}. You are creating a tender, romantic devotional for a couple deeply in love.
@@ -52,8 +52,9 @@ Respond ONLY with this exact JSON (no markdown, no extra text):
         )
 
         if (!geminiRes.ok) {
+            const errText = await geminiRes.text()
             console.error('Gemini HTTP error', geminiRes.status)
-            return res.status(200).json(FALLBACK)
+            return res.status(200).json({ ...FALLBACK, _debug: `HTTP ${geminiRes.status}: ${errText}` })
         }
 
         const data = await geminiRes.json()
@@ -63,10 +64,12 @@ Respond ONLY with this exact JSON (no markdown, no extra text):
         try {
             // responseMimeType: 'application/json' usually returns clean JSON
             parsed = JSON.parse(raw)
-        } catch {
+        } catch (e) {
             const m = raw.match(/\{[\s\S]*\}/)
             if (m) {
-                try { parsed = JSON.parse(m[0]) } catch { /* use fallback */ }
+                try { parsed = JSON.parse(m[0]) } catch { parsed = { ...FALLBACK, _debug: `Parse error on match: ${m[0]}` } }
+            } else {
+                parsed = { ...FALLBACK, _debug: `Parse error on raw: ${raw}` }
             }
         }
 
@@ -75,6 +78,6 @@ Respond ONLY with this exact JSON (no markdown, no extra text):
         return res.status(200).json(parsed)
     } catch (err) {
         console.error('handler error', err)
-        return res.status(200).json(FALLBACK)
+        return res.status(200).json({ ...FALLBACK, _debug: `Catch error: ${err.message}` })
     }
 }
