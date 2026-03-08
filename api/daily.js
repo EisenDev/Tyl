@@ -16,23 +16,26 @@ export default async function handler(req, res) {
     if (!date) return res.status(400).json({ error: 'date query param required' })
 
     const apiKey = process.env.GEMINI_API_KEY
-    const model = process.env.GEMINI_MODEL || 'gemini-2.0-flash'
+    const model = process.env.GEMINI_MODEL || 'gemini-2.5-flash'
 
     if (!apiKey) {
         console.warn('GEMINI_API_KEY not set — returning fallback')
         return res.status(200).json(FALLBACK)
     }
 
-    const prompt = `Today's date is ${date}. You are creating a tender, romantic devotional for a couple deeply in love.
+    const prompt = `Today's date is ${date}. You are creating a tender, romantic devotional for a couple deeply in love (Eisen and Peinshiii).
+    
+    Eisen is the one sending this, and Peinshiii is the recipient. 
 
-Generate:
-1. ONE Bible verse that speaks beautifully to love, patience, faithfulness, or hope — include the exact verse text AND its scripture reference.
-2. ONE original, heartfelt quote (1–2 warm sentences) about love, choosing each other, or growing together.
+    Generate:
+    1. ONE Bible verse that speaks beautifully to love, patience, or faithfulness — include the exact verse text AND its scripture reference.
+    2. ONE unique, heartfelt quote (1–2 warm sentences) about their specific connection, or growing together. 
 
-Make the content feel specific to this date — each day should feel unique and fresh.
+    Respond ONLY with this exact JSON format (ensure valid JSON):
+    {"verse":{"text":"...","reference":"..."},"quote":"..."}`
 
-Respond ONLY with this exact JSON (no markdown, no extra text):
-{"verse":{"text":"...","reference":"..."},"quote":"..."}`
+    let responseData = FALLBACK
+    let isSuccessful = false
 
     try {
         const geminiRes = await fetch(
@@ -43,35 +46,49 @@ Respond ONLY with this exact JSON (no markdown, no extra text):
                 body: JSON.stringify({
                     contents: [{ parts: [{ text: prompt }] }],
                     generationConfig: {
-                        temperature: 0.85,
-                        maxOutputTokens: 350,
+                        temperature: 1.0,  // Maximize variety
+                        maxOutputTokens: 500,
                         responseMimeType: 'application/json',
                     },
                 }),
             }
         )
 
-        if (!geminiRes.ok) {
-            const txt = await geminiRes.text()
-            console.error('Gemini HTTP error', geminiRes.status)
-            return res.status(200).json({ ...FALLBACK, _debug: `HTTP ${geminiRes.status}: ${txt}` })
+        if (geminiRes.ok) {
+            const data = await geminiRes.json()
+            let raw = data.candidates?.[0]?.content?.parts?.[0]?.text ?? ''
+
+            // CLEANSE: Remove potential Markdown fences
+            raw = raw.replace(/```json/g, '').replace(/```/g, '').trim()
+
+            try {
+                const parsed = JSON.parse(raw)
+                if (parsed.verse && parsed.quote) {
+                    responseData = parsed
+                    isSuccessful = true
+                }
+            } catch (err) {
+                console.error('JSON Parse error', err, 'Raw:', raw)
+            }
+        } else {
+            const errTxt = await geminiRes.text()
+            console.error('Gemini API Failure:', geminiRes.status, errTxt)
         }
 
-        const data = await geminiRes.json()
-        const raw = data.candidates?.[0]?.content?.parts?.[0]?.text ?? ''
-
-        let parsed = FALLBACK
-        try {
-            parsed = JSON.parse(raw)
-        } catch {
-            parsed = { ...FALLBACK, _debug: `Parse error on: ${raw}` }
+        // Cache-Control Strategy
+        if (isSuccessful) {
+            // Success: Cache for 24h on Vercel Edge Cache (date-specific)
+            res.setHeader('Cache-Control', 's-maxage=86400, stale-while-revalidate=43200')
+        } else {
+            // Failure: Do NOT cache fallbacks so we can retry fresh next time
+            res.setHeader('Cache-Control', 'no-store, max-age=0, must-revalidate')
         }
 
-        // Tell Vercel CDN to cache for exactly 24 h → same date always same response
-        res.setHeader('Cache-Control', 's-maxage=86400, stale-while-revalidate=3600')
-        return res.status(200).json(parsed)
+        return res.status(200).json(responseData)
+
     } catch (err) {
-        console.error('handler error', err)
+        console.error('Outer handler error', err)
+        res.setHeader('Cache-Control', 'no-store, max-age=0, must-revalidate')
         return res.status(200).json(FALLBACK)
     }
 }

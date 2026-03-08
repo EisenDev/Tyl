@@ -23,6 +23,9 @@
       <!-- Audio player -->
       <AudioPlayer v-if="!isProposalRoute" ref="audioPlayerRef" :pending-auto-play="pendingAutoPlay" />
 
+      <!-- Special Letters Widget -->
+      <LettersWidget v-if="!isProposalRoute" />
+
       <!-- Tulip confetti trigger -->
       <TulipConfetti v-if="!isProposalRoute" />
 
@@ -42,6 +45,7 @@ import FloatingTulip from './components/FloatingTulip.vue'
 import SiteNav from './components/SiteNav.vue'
 import AudioPlayer from './components/AudioPlayer.vue'
 import TulipConfetti from './components/TulipConfetti.vue'
+import LettersWidget from './components/LETTERS/LettersWidget.vue'
 
 const unlocked = ref(false)
 const scrollProgress = ref(0)
