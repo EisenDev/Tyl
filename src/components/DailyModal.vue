@@ -109,21 +109,30 @@ const error   = ref('')
 
 async function fetchDaily() {
   computePhDate()
-  const cacheKey = `daily-v10-${dateParam.value}`
+  const cacheKey = `daily-v11-${dateParam.value}`
   const cached   = localStorage.getItem(cacheKey)
 
   if (cached) {
-    try { content.value = JSON.parse(cached); return } catch { /* stale */ }
+    try {
+      const parsed = JSON.parse(cached)
+      if (parsed.verse && parsed.quote) {
+        content.value = parsed
+        return
+      }
+    } catch { /* stale */ }
   }
 
   loading.value = true
   error.value   = ''
   try {
-    const res  = await fetch(`/api/daily?date=${dateParam.value}&v=10`)
+    const res  = await fetch(`/api/daily?date=${dateParam.value}&v=11`)
     const data = await res.json()
     if (data.verse && data.quote) {
       content.value = data
-      localStorage.setItem(cacheKey, JSON.stringify(data))
+      // ONLY CACHE if it is not the fallback response
+      if (!data._isFallback) {
+        localStorage.setItem(cacheKey, JSON.stringify(data))
+      }
     } else {
       throw new Error('malformed response')
     }

@@ -4,6 +4,7 @@ const FALLBACK = {
         reference: '1 Corinthians 13:4–5',
     },
     quote: 'The best thing to hold onto in life is each other. — Audrey Hepburn',
+    _isFallback: true,
 }
 
 export default async function handler(req, res) {
@@ -16,78 +17,68 @@ export default async function handler(req, res) {
     if (!date) return res.status(400).json({ error: 'date query param required' })
 
     const apiKey = process.env.GEMINI_API_KEY
-    const model = process.env.GEMINI_MODEL || 'gemini-2.5-flash'
+    if (!apiKey) return res.status(200).json(FALLBACK)
 
-    if (!apiKey) {
-        console.warn('GEMINI_API_KEY not set — returning fallback')
-        return res.status(200).json(FALLBACK)
-    }
+    const primaryModel = process.env.GEMINI_MODEL || 'gemini-2.5-flash'
+    const fallbackModel = 'gemini-1.5-flash'
 
     const prompt = `Today's date is ${date}. You are creating a tender, romantic devotional for a couple deeply in love (Eisen and Peinshiii).
-    
-    Eisen is the one sending this, and Peinshiii is the recipient. 
-
+    Eisen is the sender, Peinshiii is the recipient. 
     Generate:
-    1. ONE Bible verse that speaks beautifully to love, patience, or faithfulness — include the exact verse text AND its scripture reference.
-    2. ONE unique, heartfelt quote (1–2 warm sentences) about their specific connection, or growing together. 
+    1. ONE Bible verse (love/faithfulness) — include text and reference.
+    2. ONE unique, heartfelt quote about their bond.
+    Respond ONLY with JSON: {"verse":{"text":"...","reference":"..."},"quote":"..."}`
 
-    Respond ONLY with this exact JSON format (ensure valid JSON):
-    {"verse":{"text":"...","reference":"..."},"quote":"..."}`
-
-    let responseData = FALLBACK
-    let isSuccessful = false
-
-    try {
-        const geminiRes = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
-            {
+    async function tryGenerate(modelName) {
+        try {
+            const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     contents: [{ parts: [{ text: prompt }] }],
-                    generationConfig: {
-                        temperature: 1.0,  // Maximize variety
-                        maxOutputTokens: 500,
-                        responseMimeType: 'application/json',
-                    },
-                }),
-            }
-        )
+                    generationConfig: { temperature: 1.0, maxOutputTokens: 500, responseMimeType: 'application/json' }
+                })
+            })
 
-        if (geminiRes.ok) {
+            if (!geminiRes.ok) {
+                const errTxt = await geminiRes.text()
+                console.error(`Gemini [${modelName}] failed:`, geminiRes.status, errTxt)
+                return { success: false, status: geminiRes.status }
+            }
+
             const data = await geminiRes.json()
             let raw = data.candidates?.[0]?.content?.parts?.[0]?.text ?? ''
-
-            // CLEANSE: Remove potential Markdown fences
             raw = raw.replace(/```json/g, '').replace(/```/g, '').trim()
 
-            try {
-                const parsed = JSON.parse(raw)
-                if (parsed.verse && parsed.quote) {
-                    responseData = parsed
-                    isSuccessful = true
-                }
-            } catch (err) {
-                console.error('JSON Parse error', err, 'Raw:', raw)
+            const parsed = JSON.parse(raw)
+            if (parsed.verse && parsed.quote) {
+                return { success: true, data: parsed }
             }
-        } else {
-            const errTxt = await geminiRes.text()
-            console.error('Gemini API Failure:', geminiRes.status, errTxt)
+            return { success: false }
+        } catch (e) {
+            console.error(`TryGenerate [${modelName}] catch:`, e)
+            return { success: false }
+        }
+    }
+
+    try {
+        let result = await tryGenerate(primaryModel)
+
+        // If Primary hits Quota (429) or doesn't exist (404), switch to high-quota 1.5-flash
+        if (!result.success && (result.status === 429 || result.status === 404)) {
+            console.warn(`Rotating to fallback model because ${primaryModel} failed with ${result.status}`)
+            result = await tryGenerate(fallbackModel)
         }
 
-        // Cache-Control Strategy
-        if (isSuccessful) {
-            // Success: Cache for 24h on Vercel Edge Cache (date-specific)
+        if (result.success) {
             res.setHeader('Cache-Control', 's-maxage=86400, stale-while-revalidate=43200')
+            return res.status(200).json(result.data)
         } else {
-            // Failure: Do NOT cache fallbacks so we can retry fresh next time
             res.setHeader('Cache-Control', 'no-store, max-age=0, must-revalidate')
+            return res.status(200).json(FALLBACK)
         }
-
-        return res.status(200).json(responseData)
-
     } catch (err) {
-        console.error('Outer handler error', err)
+        console.error('Final API Handler failure:', err)
         res.setHeader('Cache-Control', 'no-store, max-age=0, must-revalidate')
         return res.status(200).json(FALLBACK)
     }
