@@ -19,67 +19,59 @@ export default async function handler(req, res) {
     const apiKey = process.env.GEMINI_API_KEY
     if (!apiKey) return res.status(200).json(FALLBACK)
 
-    const models = [
-        process.env.GEMINI_MODEL || 'gemini-1.5-flash',
-        'gemini-2.0-flash',
-        'gemini-1.5-pro'
-    ]
+    // ONLY USE gemini-2.5-flash AS REQUESTED
+    const modelName = 'gemini-2.5-flash'
 
-    const prompt = `Today's date is ${date}. You are creating a unique daily devotional for a couple deeply in love (Eisen and Peinshiii).
+    const prompt = `Today's date is ${date}. You are creating a unique, deeply personalized daily devotional for a couple in love: Eisen and Peinshiii.
     Eisen is the sender, Peinshiii is the recipient. 
 
-    CRITICAL: Do NOT repeat previous themes. Today, pick a specific theme from this list: [Deep Trust, Shared Growth, Playful Joy, Quiet Devotion, Future Dreams, or Resilience].
+    STRICT RULES:
+    1. NEVER repeat a devotion or scripture unless exactly one year has passed since it was last used.
+    2. THEMES TO CYCLE: Love, Gratefulness, Growth, Forgiveness, Devotion, Trust, Future, Resilience, Patience, Faithfulness.
+    3. BE FRESH: Each day must feel like a brand-new discovery. If there is even a 1% chance it was used recently, pick something completely different.
+    4. SCRIPTURE: Pick ONE Bible verse that fits the day's mood perfectly.
+    5. QUOTE: ONE unique, heartfelt quote (1-2 sentences) about their bond.
 
-    Generate:
-    1. ONE Bible verse that fits the chosen theme — include text and reference.
-    2. ONE fresh, heartfelt quote (1-2 sentences) about their connection.
-    
-    Respond ONLY with JSON: {"verse":{"text":"...","reference":"..."},"quote":"..."}`
+    Respond ONLY with valid JSON: {"verse":{"text":"...","reference":"..."},"quote":"..."}`
 
-    async function tryGenerate(modelName) {
-        try {
-            // Use a unique cache-buster key in the URL to ensure fresh AI calls
-            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    contents: [{ parts: [{ text: prompt }] }],
-                    generationConfig: {
-                        temperature: 1.0,
-                        maxOutputTokens: 600,
-                        responseMimeType: 'application/json',
-                        candidateCount: 1
-                    }
-                })
+    try {
+        const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: prompt }] }],
+                generationConfig: {
+                    temperature: 1.0,
+                    maxOutputTokens: 600,
+                    responseMimeType: 'application/json'
+                }
             })
-            if (!res.ok) {
-                const txt = await res.text()
-                return { success: false, status: res.status, error: txt }
-            }
-            const data = await res.json()
-            let raw = data.candidates?.[0]?.content?.parts?.[0]?.text ?? ''
-            raw = raw.replace(/```json/g, '').replace(/```/g, '').trim()
-            const parsed = JSON.parse(raw)
-            return { success: !!(parsed.verse && parsed.quote), data: parsed }
-        } catch (e) { return { success: false, error: e.message } }
-    }
+        })
 
-    let lastError = 'No models attempted'
-    for (const modelName of models) {
-        const result = await tryGenerate(modelName)
-        if (result.success) {
-            // Success: Cache for 24h at the edge
-            res.setHeader('Cache-Control', 's-maxage=86400, stale-while-revalidate=43200')
-            return res.status(200).json(result.data)
+        if (!geminiRes.ok) {
+            const errTxt = await geminiRes.text()
+            console.error(`Gemini [${modelName}] failed:`, geminiRes.status, errTxt)
+            // If it fails, we return fallback but tell frontend NOT to cache it
+            res.setHeader('Cache-Control', 'no-store, max-age=0, must-revalidate')
+            return res.status(200).json({ ...FALLBACK, _debug: `Error ${geminiRes.status}` })
         }
-        lastError = result.error || 'Unknown error'
-        console.warn(`Model ${modelName} failed. Trying next...`)
-    }
 
-    // If all fail
-    res.setHeader('Cache-Control', 'no-store, max-age=0, must-revalidate')
-    return res.status(200).json({
-        ...FALLBACK,
-        _debug: lastError.substring(0, 100) // Secret debug for us
-    })
+        const data = await geminiRes.json()
+        let raw = data.candidates?.[0]?.content?.parts?.[0]?.text ?? ''
+        raw = raw.replace(/```json/g, '').replace(/```/g, '').trim()
+
+        const parsed = JSON.parse(raw)
+        if (parsed.verse && parsed.quote) {
+            // SUCCESS: Cache for 24 hours
+            res.setHeader('Cache-Control', 's-maxage=86400, stale-while-revalidate=43200')
+            return res.status(200).json(parsed)
+        }
+
+        throw new Error('Invalid JSON structure from AI')
+
+    } catch (err) {
+        console.error('Final API Handler failure:', err)
+        res.setHeader('Cache-Control', 'no-store, max-age=0, must-revalidate')
+        return res.status(200).json(FALLBACK)
+    }
 }
