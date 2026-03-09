@@ -73,6 +73,9 @@
 <script setup lang="ts">
 import { ref, watch, onMounted, onUnmounted } from 'vue'
 import TulipSvg from './TulipSvg.vue'
+import versionData from '../version.json'
+
+const version = versionData.version
 
 const props = defineProps<{ open: boolean }>()
 const emit  = defineEmits<{ (e: 'update:open', v: boolean): void }>()
@@ -109,7 +112,7 @@ const error   = ref('')
 
 async function fetchDaily() {
   computePhDate()
-  const cacheKey = `daily-v13-${dateParam.value}`
+  const cacheKey = `daily-v${version}-${dateParam.value}`
   const cached   = localStorage.getItem(cacheKey)
 
   if (cached) {
@@ -125,7 +128,7 @@ async function fetchDaily() {
   loading.value = true
   error.value   = ''
   try {
-    const res  = await fetch(`/api/daily?date=${dateParam.value}&v=13`)
+    const res  = await fetch(`/api/daily?date=${dateParam.value}&v=${version}`)
     const data = await res.json()
     if (data.verse && data.quote) {
       content.value = data
