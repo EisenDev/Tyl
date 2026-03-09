@@ -109,7 +109,7 @@ const error   = ref('')
 
 async function fetchDaily() {
   computePhDate()
-  const cacheKey = `daily-v11-${dateParam.value}`
+  const cacheKey = `daily-v12-${dateParam.value}`
   const cached   = localStorage.getItem(cacheKey)
 
   if (cached) {
@@ -125,7 +125,7 @@ async function fetchDaily() {
   loading.value = true
   error.value   = ''
   try {
-    const res  = await fetch(`/api/daily?date=${dateParam.value}&v=11`)
+    const res  = await fetch(`/api/daily?date=${dateParam.value}&v=12`)
     const data = await res.json()
     if (data.verse && data.quote) {
       content.value = data

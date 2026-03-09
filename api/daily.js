@@ -19,67 +19,67 @@ export default async function handler(req, res) {
     const apiKey = process.env.GEMINI_API_KEY
     if (!apiKey) return res.status(200).json(FALLBACK)
 
-    const primaryModel = process.env.GEMINI_MODEL || 'gemini-2.5-flash'
-    const fallbackModel = 'gemini-1.5-flash'
+    const models = [
+        process.env.GEMINI_MODEL || 'gemini-1.5-flash',
+        'gemini-2.0-flash',
+        'gemini-1.5-pro'
+    ]
 
-    const prompt = `Today's date is ${date}. You are creating a tender, romantic devotional for a couple deeply in love (Eisen and Peinshiii).
+    const prompt = `Today's date is ${date}. You are creating a unique daily devotional for a couple deeply in love (Eisen and Peinshiii).
     Eisen is the sender, Peinshiii is the recipient. 
+
+    CRITICAL: Do NOT repeat previous themes. Today, pick a specific theme from this list: [Deep Trust, Shared Growth, Playful Joy, Quiet Devotion, Future Dreams, or Resilience].
+
     Generate:
-    1. ONE Bible verse (love/faithfulness) — include text and reference.
-    2. ONE unique, heartfelt quote about their bond.
+    1. ONE Bible verse that fits the chosen theme — include text and reference.
+    2. ONE fresh, heartfelt quote (1-2 sentences) about their connection.
+    
     Respond ONLY with JSON: {"verse":{"text":"...","reference":"..."},"quote":"..."}`
 
     async function tryGenerate(modelName) {
         try {
-            const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`, {
+            // Use a unique cache-buster key in the URL to ensure fresh AI calls
+            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     contents: [{ parts: [{ text: prompt }] }],
-                    generationConfig: { temperature: 1.0, maxOutputTokens: 500, responseMimeType: 'application/json' }
+                    generationConfig: {
+                        temperature: 1.0,
+                        maxOutputTokens: 600,
+                        responseMimeType: 'application/json',
+                        candidateCount: 1
+                    }
                 })
             })
-
-            if (!geminiRes.ok) {
-                const errTxt = await geminiRes.text()
-                console.error(`Gemini [${modelName}] failed:`, geminiRes.status, errTxt)
-                return { success: false, status: geminiRes.status }
+            if (!res.ok) {
+                const txt = await res.text()
+                return { success: false, status: res.status, error: txt }
             }
-
-            const data = await geminiRes.json()
+            const data = await res.json()
             let raw = data.candidates?.[0]?.content?.parts?.[0]?.text ?? ''
             raw = raw.replace(/```json/g, '').replace(/```/g, '').trim()
-
             const parsed = JSON.parse(raw)
-            if (parsed.verse && parsed.quote) {
-                return { success: true, data: parsed }
-            }
-            return { success: false }
-        } catch (e) {
-            console.error(`TryGenerate [${modelName}] catch:`, e)
-            return { success: false }
-        }
+            return { success: !!(parsed.verse && parsed.quote), data: parsed }
+        } catch (e) { return { success: false, error: e.message } }
     }
 
-    try {
-        let result = await tryGenerate(primaryModel)
-
-        // If Primary hits Quota (429) or doesn't exist (404), switch to high-quota 1.5-flash
-        if (!result.success && (result.status === 429 || result.status === 404)) {
-            console.warn(`Rotating to fallback model because ${primaryModel} failed with ${result.status}`)
-            result = await tryGenerate(fallbackModel)
-        }
-
+    let lastError = 'No models attempted'
+    for (const modelName of models) {
+        const result = await tryGenerate(modelName)
         if (result.success) {
+            // Success: Cache for 24h at the edge
             res.setHeader('Cache-Control', 's-maxage=86400, stale-while-revalidate=43200')
             return res.status(200).json(result.data)
-        } else {
-            res.setHeader('Cache-Control', 'no-store, max-age=0, must-revalidate')
-            return res.status(200).json(FALLBACK)
         }
-    } catch (err) {
-        console.error('Final API Handler failure:', err)
-        res.setHeader('Cache-Control', 'no-store, max-age=0, must-revalidate')
-        return res.status(200).json(FALLBACK)
+        lastError = result.error || 'Unknown error'
+        console.warn(`Model ${modelName} failed. Trying next...`)
     }
+
+    // If all fail
+    res.setHeader('Cache-Control', 'no-store, max-age=0, must-revalidate')
+    return res.status(200).json({
+        ...FALLBACK,
+        _debug: lastError.substring(0, 100) // Secret debug for us
+    })
 }
